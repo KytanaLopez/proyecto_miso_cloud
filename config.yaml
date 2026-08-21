@@ -1,0 +1,37 @@
+team:
+  name: Grupo28
+  members:
+    - user: fredygamez@uniandes.edu.co
+      percentage: 25
+    - user: c.lopezb2@uniandes.edu.co
+      percentage: 25
+    - user: CAMBIAR_correo_integrante_3
+      percentage: 25
+    - user: CAMBIAR_correo_integrante_4
+      percentage: 25
+board: CAMBIAR_link_tablero_kanban
+docs: CAMBIAR_link_github_pages
+users_app:
+  folder: users_app
+  image_name: users-app
+  image_tag: 1.0.0
+  authors:
+    - CAMBIAR_correo_responsable_users
+posts_app:
+  folder: posts_app
+  image_name: posts-app
+  image_tag: 1.0.0
+  authors:
+    - CAMBIAR_correo_responsable_posts
+routes_app:
+  folder: routes_app
+  image_name: routes-app
+  image_tag: 1.0.0
+  authors:
+    - CAMBIAR_correo_responsable_routes
+offers_app:
+  folder: offers_app
+  image_name: offers-app
+  image_tag: 1.0.0
+  authors:
+    - CAMBIAR_correo_responsable_offers

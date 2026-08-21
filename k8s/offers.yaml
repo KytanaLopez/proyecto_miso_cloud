@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: offers-app
+  labels:
+    app: offers-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: offers-app
+  template:
+    metadata:
+      labels:
+        app: offers-app
+    spec:
+      containers:
+        - name: offers-app
+          image: offers-app:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DB_HOST
+              value: offers-db-service
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: postgres
+            - name: DB_PASSWORD
+              value: postgres
+            - name: DB_NAME
+              value: offers_db
+          readinessProbe:
+            httpGet:
+              path: /offers/ping
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: offers-app-service
+spec:
+  type: NodePort
+  selector:
+    app: offers-app
+  ports:
+    - port: 80
+      targetPort: 8000
+      nodePort: 30003
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: offers-db
+  labels:
+    app: offers-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: offers-db
+  template:
+    metadata:
+      labels:
+        app: offers-db
+    spec:
+      containers:
+        - name: offers-db
+          image: postgres:15
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgres
+            - name: POSTGRES_DB
+              value: offers_db
+          readinessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: offers-db-data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: offers-db-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: offers-db-service
+spec:
+  type: ClusterIP
+  selector:
+    app: offers-db
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: offers-network
+spec:
+  podSelector:
+    matchLabels:
+      app: offers-db
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: offers-app
+      ports:
+        - protocol: TCP
+          port: 5432

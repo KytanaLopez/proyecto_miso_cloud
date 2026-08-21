@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: posts-app
+  labels:
+    app: posts-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: posts-app
+  template:
+    metadata:
+      labels:
+        app: posts-app
+    spec:
+      containers:
+        - name: posts-app
+          image: posts-app:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DB_HOST
+              value: posts-db-service
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: postgres
+            - name: DB_PASSWORD
+              value: postgres
+            - name: DB_NAME
+              value: posts_db
+          readinessProbe:
+            httpGet:
+              path: /posts/ping
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: posts-app-service
+spec:
+  type: NodePort
+  selector:
+    app: posts-app
+  ports:
+    - port: 80
+      targetPort: 8000
+      nodePort: 30001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: posts-db
+  labels:
+    app: posts-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: posts-db
+  template:
+    metadata:
+      labels:
+        app: posts-db
+    spec:
+      containers:
+        - name: posts-db
+          image: postgres:15
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgres
+            - name: POSTGRES_DB
+              value: posts_db
+          readinessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: posts-db-data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: posts-db-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: posts-db-service
+spec:
+  type: ClusterIP
+  selector:
+    app: posts-db
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: posts-network
+spec:
+  podSelector:
+    matchLabels:
+      app: posts-db
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: posts-app
+      ports:
+        - protocol: TCP
+          port: 5432
