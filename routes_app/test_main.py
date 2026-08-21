@@ -42,7 +42,7 @@ def clean_database():
 def test_ping():
     response = client.get("/routes/ping")
     assert response.status_code == 200
-    assert response.text == "pong"
+    assert response.text == "pong_grupo_28"
 
 
 def test_reset():

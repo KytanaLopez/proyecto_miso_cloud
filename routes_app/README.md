@@ -23,7 +23,7 @@ routes_app/
 | GET | /routes/{id} | Consultar un trayecto |
 | DELETE | /routes/{id} | Eliminar un trayecto |
 | GET | /routes/count | Cantidad de trayectos |
-| GET | /routes/ping | Salud del servicio (responde `pong`) |
+| GET | /routes/ping | Salud del servicio (responde `pong_grupo_28`) |
 | POST | /routes/reset | Borra todos los datos |
 
 ## Variables de entorno
