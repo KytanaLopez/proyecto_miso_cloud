@@ -157,7 +157,7 @@ async def validation_handler(request: Request, exc: RequestValidationError):
 
 @app.get("/routes/ping")
 def ping():
-    return PlainTextResponse("pong")
+    return PlainTextResponse("pong_grupo_28")
 
 
 @app.post("/routes/reset")
